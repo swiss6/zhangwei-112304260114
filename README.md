@@ -47,7 +47,7 @@
 
 ![Kaggle截图](./images/kaggle_score.png)
 
-> 截图文件名：112304260114_张蔚_kaggle_score.png（实际文件：1123304260132_张蔚_kaggle_score.png）
+> 截图文件名：112304260114_张蔚_kaggle_score.png
 
 ---
 
