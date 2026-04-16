@@ -1,5 +1,5 @@
 """
-综合方法: Word2Vec + TF-IDF特征融合 + XGBoost
+综合方法: Word2Vec + TF-IDF特征融合 + XGBoost/Logistic Regression
 目标: Kaggle AUC >= 0.94
 """
 
@@ -16,6 +16,12 @@ from scipy.sparse import hstack, csr_matrix
 import os
 import joblib
 
+# 项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+SUBMISSION_DIR = os.path.join(PROJECT_ROOT, "submission")
+
 # 最小停用词列表
 MINIMAL_STOPWORDS = set([
     'a', 'an', 'the', 'and', 'or', 'but', 'if', 'because', 'as', 'until', 'while',
@@ -31,8 +37,6 @@ MINIMAL_STOPWORDS = set([
     'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
     'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing'
 ])
-
-DATA_DIR = "D:/Code/pythonDemo/Bag of Words Meets Bags of Popcorn"
 
 def preprocess_text(raw_review, remove_stopwords=True):
     """Clean and tokenize text"""
@@ -179,7 +183,7 @@ def main():
         test_predictions = (model.predict(dtest) > 0.5).astype(int)
 
         # Save model
-        model.save_model(os.path.join(DATA_DIR, "xgboost_model.json"))
+        model.save_model(os.path.join(MODELS_DIR, "xgboost_model.json"))
 
     except ImportError:
         print("XGBoost not available, using Logistic Regression...")
@@ -210,13 +214,12 @@ def main():
         final_model.fit(train_features, train["sentiment"])
 
         test_predictions = final_model.predict(test_features)
-        joblib.dump(final_model, os.path.join(DATA_DIR, "lr_combined_model.pkl"))
+        joblib.dump(final_model, os.path.join(MODELS_DIR, "lr_combined_model.pkl"))
 
     # Save submission
     output = pd.DataFrame(data={"id": test["id"], "sentiment": test_predictions})
-    submission_path = os.path.join(DATA_DIR, "Combined_submission.csv")
-    output.to_csv(submission_path, index=False, quoting=3)
-    print(f"\nSubmission saved to {submission_path}")
+    output.to_csv(os.path.join(SUBMISSION_DIR, "Combined_submission.csv"), index=False, quoting=3)
+    print(f"\nSubmission saved to submission/Combined_submission.csv")
 
     return val_auc
 

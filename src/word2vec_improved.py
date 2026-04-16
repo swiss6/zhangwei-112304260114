@@ -1,6 +1,7 @@
 """
 Improved Word2Vec + TF-IDF Weighted Embedding + Logistic Regression
 优化目标: Kaggle AUC >= 0.94
+最终方案：TF-IDF加权Word2Vec + 逻辑回归
 """
 
 import pandas as pd
@@ -15,6 +16,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from collections import Counter
 import os
 import joblib
+
+# 项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+SUBMISSION_DIR = os.path.join(PROJECT_ROOT, "submission")
 
 # 保留否定词和情感相关词，只移除真正无意义的停用词
 MINIMAL_STOPWORDS = set([
@@ -39,8 +46,6 @@ NEGATION_WORDS = set([
     "can't", "isn't", "aren't", "wasn't", "weren't", "haven't", "hasn't", "hadn't"
 ])
 
-DATA_DIR = "D:/Code/pythonDemo/Bag of Words Meets Bags of Popcorn"
-
 def preprocess_text_improved(raw_review, remove_stopwords=True):
     """Improved text preprocessing"""
     # Remove HTML
@@ -48,13 +53,13 @@ def preprocess_text_improved(raw_review, remove_stopwords=True):
 
     # Handle contractions and negations
     review_text = review_text.lower()
-    review_text = re.sub(r"n't", " not", review_text)
-    review_text = re.sub(r"'re", " are", review_text)
-    review_text = re.sub(r"'s", " is", review_text)
-    review_text = re.sub(r"'d", " would", review_text)
-    review_text = re.sub(r"'ll", " will", review_text)
-    review_text = re.sub(r"'ve", " have", review_text)
-    review_text = re.sub(r"'m", " am", review_text)
+    review_text = re.sub(r"n\'t", " not", review_text)
+    review_text = re.sub(r"\'re", " are", review_text)
+    review_text = re.sub(r"\'s", " is", review_text)
+    review_text = re.sub(r"\'d", " would", review_text)
+    review_text = re.sub(r"\'ll", " will", review_text)
+    review_text = re.sub(r"\'ve", " have", review_text)
+    review_text = re.sub(r"\'m", " am", review_text)
 
     # Remove non-letters but keep important punctuation patterns
     letters_only = re.sub("[^a-zA-Z]", " ", review_text)
@@ -97,10 +102,10 @@ def get_mean_embedding(words, model, vector_size):
     return feature_vec
 
 def main():
-    w2v_model_path = os.path.join(DATA_DIR, "word2vec_improved.model")
-    train_emb_path = os.path.join(DATA_DIR, "train_w2v_embeddings_improved.npy")
-    test_emb_path = os.path.join(DATA_DIR, "test_w2v_embeddings_improved.npy")
-    tfidf_path = os.path.join(DATA_DIR, "tfidf_vectorizer.pkl")
+    w2v_model_path = os.path.join(MODELS_DIR, "word2vec_improved.model")
+    train_emb_path = os.path.join(MODELS_DIR, "train_w2v_embeddings_improved.npy")
+    test_emb_path = os.path.join(MODELS_DIR, "test_w2v_embeddings_improved.npy")
+    tfidf_path = os.path.join(MODELS_DIR, "tfidf_vectorizer.pkl")
 
     # Load data
     print("Loading data...")
@@ -215,7 +220,7 @@ def main():
     print(f"\nBest C={best_C}, Best validation AUC: {best_auc:.4f}")
 
     # Save the best model
-    model_path = os.path.join(DATA_DIR, "lr_w2v_model_improved.pkl")
+    model_path = os.path.join(MODELS_DIR, "lr_w2v_model_improved.pkl")
     joblib.dump(best_model, model_path)
 
     # Retrain on full training data
@@ -229,7 +234,7 @@ def main():
 
     # Create submission file
     output = pd.DataFrame(data={"id": test["id"], "sentiment": test_predictions})
-    submission_path = os.path.join(DATA_DIR, "Word2Vec_LR_submission_improved.csv")
+    submission_path = os.path.join(SUBMISSION_DIR, "Word2Vec_LR_submission_improved.csv")
     output.to_csv(submission_path, index=False, quoting=3)
     print(f"Submission file saved to {submission_path}")
 

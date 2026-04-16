@@ -13,8 +13,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 import os
 import joblib
-import gzip
-import shutil
+
+# 项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+SUBMISSION_DIR = os.path.join(PROJECT_ROOT, "submission")
+
+GOOGLE_W2V_PATH = os.path.join(DATA_DIR, "GoogleNews-vectors-negative300.bin")
 
 # 保留否定词的停用词列表
 MINIMAL_STOPWORDS = set([
@@ -31,9 +37,6 @@ MINIMAL_STOPWORDS = set([
     'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
     'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing'
 ])
-
-DATA_DIR = "D:/Code/pythonDemo/Bag of Words Meets Bags of Popcorn"
-GOOGLE_W2V_PATH = os.path.join(DATA_DIR, "GoogleNews-vectors-negative300.bin")
 
 def preprocess_text(raw_review, remove_stopwords=True):
     """Clean and tokenize text"""
@@ -64,8 +67,8 @@ def get_mean_embedding(words, model, vector_size=300):
     return feature_vec
 
 def main():
-    train_emb_path = os.path.join(DATA_DIR, "train_google_embeddings.npy")
-    test_emb_path = os.path.join(DATA_DIR, "test_google_embeddings.npy")
+    train_emb_path = os.path.join(MODELS_DIR, "train_google_embeddings.npy")
+    test_emb_path = os.path.join(MODELS_DIR, "test_google_embeddings.npy")
 
     # Load data
     print("Loading data...")
@@ -160,7 +163,7 @@ def main():
     final_model.fit(train_embeddings, train["sentiment"])
 
     # Save model
-    model_path = os.path.join(DATA_DIR, "lr_google_w2v_model.pkl")
+    model_path = os.path.join(MODELS_DIR, "lr_google_w2v_model.pkl")
     joblib.dump(final_model, model_path)
 
     # Predict
@@ -169,9 +172,8 @@ def main():
 
     # Save submission
     output = pd.DataFrame(data={"id": test["id"], "sentiment": test_predictions})
-    submission_path = os.path.join(DATA_DIR, "GoogleWord2Vec_LR_submission.csv")
-    output.to_csv(submission_path, index=False, quoting=3)
-    print(f"Submission saved to {submission_path}")
+    output.to_csv(os.path.join(SUBMISSION_DIR, "GoogleWord2Vec_LR_submission.csv"), index=False, quoting=3)
+    print(f"Submission saved to submission/GoogleWord2Vec_LR_submission.csv")
 
     return best_auc
 

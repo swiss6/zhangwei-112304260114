@@ -14,6 +14,12 @@ from sklearn.metrics import roc_auc_score
 import os
 import joblib
 
+# 项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
+SUBMISSION_DIR = os.path.join(PROJECT_ROOT, "submission")
+
 # English stopwords
 ENGLISH_STOPWORDS = set(['a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', "aren't", 'as', 'at',
     'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by', 'can', "can't", 'cannot', 'could',
@@ -28,8 +34,6 @@ ENGLISH_STOPWORDS = set(['a', 'about', 'above', 'after', 'again', 'against', 'al
     "wasn't", 'we', "we'd", "we'll", "we're", "we've", 'were', "weren't", 'what', "what's", 'when', "when's", 'where',
     "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's", 'with', "won't", 'would', "wouldn't", 'you',
     "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'])
-
-DATA_DIR = "D:/Code/pythonDemo/Bag of Words Meets Bags of Popcorn"
 
 def preprocess_text(raw_review, remove_stopwords=True):
     """Clean and tokenize text"""
@@ -58,9 +62,9 @@ def get_mean_embedding(words, model, vector_size):
 
 def main():
     # Check if Word2Vec model already exists
-    w2v_model_path = os.path.join(DATA_DIR, "word2vec.model")
-    train_emb_path = os.path.join(DATA_DIR, "train_w2v_embeddings.npy")
-    test_emb_path = os.path.join(DATA_DIR, "test_w2v_embeddings.npy")
+    w2v_model_path = os.path.join(MODELS_DIR, "word2vec.model")
+    train_emb_path = os.path.join(MODELS_DIR, "train_w2v_embeddings.npy")
+    test_emb_path = os.path.join(MODELS_DIR, "test_w2v_embeddings.npy")
 
     # Load data
     print("Loading data...")
@@ -166,7 +170,7 @@ def main():
     print(f"\nBest C={best_C}, Best validation AUC: {best_auc:.4f}")
 
     # Save the best model
-    model_path = os.path.join(DATA_DIR, "lr_w2v_model.pkl")
+    model_path = os.path.join(MODELS_DIR, "lr_w2v_model.pkl")
     joblib.dump(best_model, model_path)
     print(f"Model saved to {model_path}")
 
@@ -181,7 +185,7 @@ def main():
 
     # Create submission file
     output = pd.DataFrame(data={"id": test["id"], "sentiment": test_predictions})
-    submission_path = os.path.join(DATA_DIR, "Word2Vec_LR_submission.csv")
+    submission_path = os.path.join(SUBMISSION_DIR, "Word2Vec_LR_submission.csv")
     output.to_csv(submission_path, index=False, quoting=3)
     print(f"Submission file saved to {submission_path}")
 
