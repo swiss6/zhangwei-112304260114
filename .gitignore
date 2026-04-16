@@ -1,0 +1,8 @@
+# 忽略数据文件
+*.tsv
+*.csv
+*.txt
+*.zip
+*.rar
+*.pkl
+*.npy
